@@ -2,7 +2,7 @@ import requests
 import json
 
 with open('ui/config.json') as f:
-    config = json.loads(f)
+    config = json.load(f)
 
 class Simcel:
     host = config['cel_api']
@@ -132,6 +132,7 @@ class Simcel:
 
 class Yfin:
     host = config['yfin_api']
+    print(host)
 
     @staticmethod
     def fetch(code, period):
@@ -149,7 +150,9 @@ class Yfin:
         response = requests.request("POST", url, headers=headers, data=payload)
         
         dta = json.loads(response.text)
+
         if dta['status']==200:
             return json.loads(dta['data'])
         else:
             return None
+
