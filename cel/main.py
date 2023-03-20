@@ -5,11 +5,13 @@ import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(dir)
+
+with open("./config.json") as f:
+    config = json.load(f)
 
 app = FastAPI()
-
-with open("/Users/uyen/simcel/config.json") as f:
-    config = json.load(f)
 
 df_items = pd.read_csv(os.path.join(config["DATA"]["root"], config["DATA"]["items"]))
 df_outlets = pd.read_csv(os.path.join(config["DATA"]["root"], config["DATA"]["outlets"]))

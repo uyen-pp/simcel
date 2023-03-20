@@ -1,0 +1,10 @@
+{
+    "DATA": {
+        "root": "./data",
+        "items": "items.csv",
+        "outlets": "outlets.csv",
+        "simcel": "simcel.csv"
+    },
+    "API_PORT": "20001",
+    "UI_PORT": "20002"   
+}
