@@ -8,7 +8,7 @@ st.set_page_config(page_title="CEL project", layout='wide')
 
 # Initialization
 if 'favorites' not in st.session_state:
-    st.session_state['favorites'] = []
+    st.session_state['favorites'] = set()
 if 'current_code' not in st.session_state:
     st.session_state['current_code'] = ''
 if 'period' not in st.session_state:
@@ -92,13 +92,6 @@ col3_2.plotly_chart(fig_3, use_container_width=False)
 
 #=================== > Section 3 < =======================#
 
-def fetch(cod):
-    period = st.session_state['period']
-    ticket_data = fin.fetch(cod, period)
-    
-    return ticket_data
-
-
 st.header(":red[3. Stock price app]")
 pad, ct = st.columns([1, 12])
 
@@ -108,73 +101,64 @@ code = ct.text_input("Input code", value="NVDA", placeholder="Input code")
 chart_area, side_info = ct.columns([3, 2])
 
 placeholder = chart_area.empty()
-period = ct.radio(
+
+period = chart_area.radio(
     "period", 
     ["1d", "5d", "1mo", "6mo", "1y", "5y"],
-    # key="1mo",
+    key="1mo",
     horizontal=True,
     label_visibility='hidden'
 )
 
 import pandas as pd
-import plotly.express as px
+import utils
+
+# Actions
+
+if code != st.session_state['current_code']:
+    st.session_state['current_code'] = code
+if period != st.session_state['period']:
+    st.session_state['period'] = period # Update current code of session
+    
+ticket_data = pd.DataFrame(fin.fetch(code, period))
+fig_stock = utils.draw_stock_history(ticket_data, period=period)
+
+placeholder.plotly_chart(fig_stock, use_container_width=True)
+
+with side_info:
+    add_fav = side_info.checkbox("Add to favorite", value=False)
+
+    if add_fav:
+        cur_cod = st.session_state['current_code']
+        st.session_state['favorites'].add(cur_cod.upper())
+    else:
+        cur_cod = st.session_state['current_code'].upper()
+        if cur_cod in st.session_state['favorites']:
+            st.session_state['favorites'].remove(cur_cod)
+
+
+#=================== > Section 4 < =======================#
+
+st.header(":red[3. Favorite tickers]")
+pad, ct = st.columns([1, 12])
+
+chart_area, side_info = ct.columns([3, 2])
+placeholder = chart_area.empty()
+
 import plotly.graph_objects as go
 
-def draw_chart():
+fig = go.Figure(
+        data = None
+    )
 
-    st.session_state['period'] = period
-    st.session_state['current_code'] = code
-
-    dta = fetch(code)
-    df = pd.DataFrame(dta)
-    # df.Datetime = pd.to_datetime(df['Datetime'])
-
-    fig_stock = go.Figure(go.Scatter(
-        x = df['Datetime'],
-        y = df['Open'],
-        mode='lines', 
-    )) 
-    
-    if period.upper() == '5D':
-        fig_stock.update_xaxes(
-            rangebreaks=[
-                dict(bounds=[20, 13.5], pattern="hour", ), 
-            ],
-            tickformat="%H:%M\n%d-%b",
+for cod in st.session_state['favorites']:
+    _dta = pd.DataFrame(fin.fetch(cod, period))
+    fig.add_trace(go.Scatter(
+            x = _dta['Datetime'],
+            y = _dta['Open'],
+            mode='lines', 
+            name=cod
         )
-    elif period.upper() in '1MO':
-        fig_stock.update_xaxes(
-            rangebreaks=[
-                dict(bounds=["sat", "mon"]), #hide weekends
-            ],
-            ticklabelmode="period",
-            dtick = 'D1',
-            tickformat="%d\n%B",
-        )
-    elif period.upper() in ['6MO', '1Y']:
-        fig_stock.update_xaxes(
-            rangebreaks=[
-                dict(bounds=["sat", "mon"]), #hide weekends
-            ],
-            dtick="M1",
-            tickformat="%b\n%Y",
-            ticklabelmode="period"
-        )
-    
-    elif period.upper() == '5Y':
-        fig_stock.update_xaxes(
-            dtick="M12")
+    )
 
-    placeholder.plotly_chart(fig_stock)
-
-draw_chart()
-# Actions
-if period:
-    if period != st.session_state['period'] or code != st.session_state['current_code']:
-        draw_chart()
-if code:
-    if period != st.session_state['period'] or code != st.session_state['current_code']:
-        draw_chart()
-
-
-# add_fav = side_info.checkbox("Add to favorite", value=False)
+placeholder.plotly_chart(fig)

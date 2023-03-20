@@ -24,7 +24,7 @@ app = FastAPI()
 
 
 @app.post("/data")
-def fetch_data(inp:InputModel) -> Output:
+async def fetch_data(inp:InputModel) -> Output:
 
     dta = yf.Ticker(inp.code)
     
@@ -57,3 +57,8 @@ def fetch_data(inp:InputModel) -> Output:
 @app.get("/")
 async def root(): 
     return {"message": "Hi I'm Mei <3"}
+
+
+import uvicorn
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=10004)
