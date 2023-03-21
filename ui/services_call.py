@@ -132,7 +132,6 @@ class Simcel:
 
 class Yfin:
     host = config['yfin_api']
-    print(host)
 
     @staticmethod
     def fetch(code, period):
@@ -156,3 +155,25 @@ class Yfin:
         else:
             return None
 
+    @staticmethod
+    def get_company_info(code):
+        """
+        return outlets information
+        """
+        url = f"{Yfin.host}/company"
+
+        payload = json.dumps({
+            "code": code,
+            "period": ""
+        })
+        headers = {}
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+        
+        dta = json.loads(response.text)
+
+        if dta['status']==200:
+            dta = json.loads(dta['data'])
+            return dta
+        else:
+            return None

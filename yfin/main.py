@@ -9,10 +9,13 @@ import yfinance as yf
 dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir)
 
+df_companies = pd.read_csv('./companies.csv')
+df_companies.rename(dict([(o, '_'.join(o.split())) for o in df_companies.columns]), axis=1, inplace=True)
+
 with open("./config.json") as f:
     config = json.load(f)
 
-class Output(BaseModel):
+class OutputModel(BaseModel):
     status = 100
     data: str
      
@@ -22,11 +25,10 @@ class InputModel(BaseModel):
 
 app = FastAPI()
 
-
 @app.post("/data")
-async def fetch_data(inp:InputModel) -> Output:
+def fetch_data(inp:InputModel) -> OutputModel:
 
-    dta = yf.Ticker(inp.code)
+    tic = yf.Ticker(inp.code)
     
     interval_map = {
         '1D': '5M',
@@ -38,9 +40,7 @@ async def fetch_data(inp:InputModel) -> Output:
     }
 
     interval = interval_map[inp.period.upper()]
-  
-    dta = dta.history(period=inp.period, interval=interval)
-
+    dta = tic.history(period=inp.period, interval=interval)
     dta.reset_index(drop=False, inplace=True)
 
     # [['Open', 'Volume']]
@@ -51,8 +51,17 @@ async def fetch_data(inp:InputModel) -> Output:
     
     dta = dta[['Datetime', 'Open', 'Close', 'High', 'Low', 'Volume']]
 
-    return Output(status=200, data=dta.to_json())
+    return OutputModel(status=200, data=dta.to_json())
 
+@app.post("/company")
+def get_info(inp:InputModel) -> OutputModel:
+    ques = inp.code.strip().lower()
+    dta = df_companies.query('@ques == ticker.str.lower() or @ques == company_name.str.lower() or @ques==short_name.str.lower()')
+    
+    dta = dta.iloc[0].to_dict() if len(dta) == 1 else None
+    js = json.dumps(dta)
+    return OutputModel(status=200, data=js)
+    
 
 @app.get("/")
 async def root(): 
