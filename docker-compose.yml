@@ -1,0 +1,17 @@
+version: '1'
+services:
+  cel:
+    image: py38-cel
+    build: ./cel
+    ports:
+      - "10002:10002"
+  yfin:
+    image: py38-yfin
+    build: ./yfin
+    ports:
+      - "10003:10002"
+  streamlit:
+    image: py38-ui
+    build: ./ui
+    ports:
+      - "10001:10002"

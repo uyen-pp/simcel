@@ -1,7 +1,7 @@
 import requests
 import json
 
-with open('ui/config.json') as f:
+with open('./config.json') as f:
     config = json.load(f)
 
 class Simcel:

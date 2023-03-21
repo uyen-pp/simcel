@@ -5,6 +5,5 @@
         "outlets": "outlets.csv",
         "simcel": "simcel.csv"
     },
-    "API_PORT": "20001",
-    "UI_PORT": "20002"   
+    "API_PORT": "10002"
 }

@@ -20,9 +20,8 @@ if 'period' not in st.session_state:
 
 tab1, tab2, tab3, tab4 = st.tabs(["CEL Data", "CEL Exploration", "YFIN Chart", "Favorites"])
 
-with tab1: 
-    #=================== > Section 1 < =======================#
-
+#=================== > Section 1 < =======================#
+with tab1:
     st.header('Cleaned CEL data')
     st.write("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.")
     pad, ct = st.columns([1, 12])
@@ -42,6 +41,7 @@ with tab1:
     items_data = cel.items_data()
     ct.dataframe(items_data, use_container_width=True)
 
+#=================== > Section 2 < =======================#
 with tab2: 
     st.header('2. Data exploration')
     st.write("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of de Finibus Bonorum et Malorum (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, Lorem ipsum dolor sit amet.., comes from a line in section 1.10.32.")
@@ -98,6 +98,7 @@ with tab2:
     fig_3 = px.bar(outlet_sale_data, x='Outlet_Identifier', y='Total sales')
     col3_2.plotly_chart(fig_3, use_container_width=False)
 
+#=================== > Section 3 < =======================#
 with tab3:
     st.header("3. Stock price app")
     st.write("It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).")
@@ -162,7 +163,8 @@ with tab3:
 
     # stat_holder.write(company_inf['description'])
     chart_holder.plotly_chart(fig_stock, use_container_width=True)
-        
+
+#=================== > Section 4 < =======================#
 with tab4: 
     import plotly.graph_objects as go
 
