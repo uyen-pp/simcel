@@ -1,6 +1,7 @@
-# simcel
+# CEL
 
 Hi I'm Mei <3
+
 This is my submited project for Data Engineer position at CEL consulting. The goal is to build a web app that will allow to showcase the results of data analysis of this raw data, then also allow users to explore stock data of related companies.
 
 On using technology that will be close to what we are using at CEL for data engineering and dev: Pandas, Streamlit and FastAPI.
@@ -52,20 +53,36 @@ The app includes 4 tabs from those you can see:
 
     - User now can hide/unhide any line by unchecking/checking at the corresponding checkboxs.
 
-## 3. My feedback
+## 3. Project overview
 
-The data: As far as i understand, there may be some points that are not correct in the data description, that is: 
+The file systems:
 
-- Item_Visiability, Item_Outlet_Sales, Outlet_Establish_Year should not be Nominal
+- Cel (cel service): provide CEL's data through FastAPI.
 
-- Categorical variables: Item_Fat_Content, Item_Type, Outlet_Size, Outlet_Location_Type, Outlet_type
+- YFin (yfin service): provide stock data through FasAPI
 
-- Continous variables: Item_Weight, Item_Visability, Item_MRP, Item_Outlet_Sale, Outlet_Establish_year
+- UI: Streamlit app works as Frontend
+
+- exporation: data preprocessing and analysis
+
+For each service I build an individual image, all to be run by docker-compose.
+
+## 4. My feedback
+
+The data: As far as i understand, there may be some points that are not correct in the data description, such as: 
+
+- Item_Visiability, Item_Outlet_Sales, Outlet_Establish_Year should not be Nominal,
+
+- Categorical variables: Item_Fat_Content, Item_Type, Outlet_Size, Outlet_Location_Type, Outlet_type,
+
+- Continous variables: Item_Weight, Item_Visability, Item_MRP, Item_Outlet_Sale, Outlet_Establish_year,
+
+These made me a litle bit concerned.
 
 The time:
 
-- It took me 4hours/day for 4 days to works on the project, there are lots of thing to do. (Hope that doesn't exceed the time limit !)
+- It took me 4hours/day for 4 days working on the project, there are lots of thing to do. (Hope that doesn't exceed the time limit !)
 
-About the tech stack:
+- Streamlit is great but since it is not really a front-end frameworks, I had to work on it quite a bit, to make everything do as expected.
 
-- Streamlit is good for demo but not too good for application building there for I have spent a large amount of time to made all flows work as expected.
+*** Thank you for reading ***
