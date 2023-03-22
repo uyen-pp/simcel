@@ -8,6 +8,9 @@ import utils
 
 st.set_page_config(page_title="CEL project", layout='wide')
 
+st.write("Hi I`m Mei <3 ")
+st.title("CEL Project")
+
 # Initialization
 if 'favorites' not in st.session_state:
     st.session_state['favorites'] = set()
