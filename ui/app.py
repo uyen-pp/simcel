@@ -23,7 +23,10 @@ tab1, tab2, tab3, tab4 = st.tabs(["CEL Data", "CEL Exploration", "YFIN Chart", "
 #=================== > Section 1 < =======================#
 with tab1:
     st.header('Cleaned CEL data')
-    st.write("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.")
+    st.write("""To show *cleaned* CEL data. Raw data is cleaned and missing values are filled in by reasonable values. Some caterical labels like *'Low Fat'*, *'low fat'*, *'LF'* are converted to be the same value (*'Low Fat'*), etc""")
+    st.write("""Data is also separated into 3 tables `Items`, `Outlets` and `Sales`, that is to be conformity with database design standards.
+    """)
+
     pad, ct = st.columns([1, 12])
     ct.subheader('1.1. Simcel data')
 
@@ -44,7 +47,8 @@ with tab1:
 #=================== > Section 2 < =======================#
 with tab2: 
     st.header('2. Data exploration')
-    st.write("Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of de Finibus Bonorum et Malorum (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, Lorem ipsum dolor sit amet.., comes from a line in section 1.10.32.")
+    st.write("This is to conduct minimal data exploration analysis, i.e try to understand some of the variable relationships in the dataset.")
+    st.write("The app also allow user interaction, that is, user can choose which attributes to show in the chart.")
 
     pad, ct = st.columns([1, 12])
 
@@ -101,14 +105,18 @@ with tab2:
 #=================== > Section 3 < =======================#
 with tab3:
     st.header("3. Stock price app")
-    st.write("It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).")
+    st.write("To create a stock charts for any ticker symbol or name that user types in. And then a chart will be presented to them where they can modify the time intervals. It should look something like the image below (using paypal as reference)..")
 
     pad, ct = st.columns([1, 12])
 
     # Element components
     input = ct.text_input("ticker", value="NVDA", placeholder="Input code", label_visibility='hidden')
+
     company_inf = fin.get_company_info(code=input)
-    code = company_inf['ticker']
+    code = None
+
+    if company_inf:
+        code = company_inf['ticker']
 
     # Some statistic
     stat_holder = ct.container()
@@ -126,49 +134,61 @@ with tab3:
         label_visibility='hidden'
     )
 
-    # Actions
-    if code != st.session_state['current_code']:
-        # Check if code is valid?
-        st.session_state['current_code'] = code
-    if period != st.session_state['period']:
-        st.session_state['period'] = period # Update current code of session
+    if code is not None:
+        # Actions
+        if code != st.session_state['current_code']:
+            # Check if code is valid?
+            st.session_state['current_code'] = code
+        if period != st.session_state['period']:
+            st.session_state['period'] = period # Update current code of session
 
-    with side_info:
-        if company_inf is not None:
-            st.write(f'{company_inf["description"]}')
-            st.write(f'Industry: {company_inf["industry"]}')
-            st.write(f'Website: {company_inf["website"]}')
-            st.write(f'CEO: {company_inf["ceo"]}')
-            st.write(f'Exchange: {company_inf["exchange"]}')
-        else: 
-            st.caption('Ticker not found. Please retry...')
+        with side_info:
+            def func():
+                if st.session_state.fav:
+                    cur_cod = st.session_state['current_code']
+                    st.session_state['favorites'].add(cur_cod.upper())
+                else:
+                    cur_cod = st.session_state['current_code'].upper()
+                    if cur_cod in st.session_state['favorites']:
+                        st.session_state['favorites'].remove(cur_cod)
 
-    ticket_data = pd.DataFrame(fin.fetch(code, period))
-    fig_stock = utils.draw_stock_history(ticket_data, period=period)
+            add_fav = st.checkbox("Add to favorite", 
+                                  value=code in st.session_state['favorites'], 
+                                  key='fav',
+                                  on_change=func)
+            
 
-    with stat_holder:
-        # st.write(company_inf)
-        st.header(company_inf['company_name'])
-        st.subheader(f'{company_inf["ticker"]}')
-        st.caption(f'Market cap: {"{:,}".format(float(company_inf["market_cap"]))}')
+            if company_inf is not None:
+                st.write(f'{company_inf["description"]}')
+                st.write(f'Industry: {company_inf["industry"]}')
+                st.write(f'Website: {company_inf["website"]}')
+                st.write(f'CEO: {company_inf["ceo"]}')
+                st.write(f'Exchange: {company_inf["exchange"]}')
+            else: 
+                st.caption('Ticker not found. Please retry...')
+
+        with stat_holder:
+            # st.write(company_inf)
+            st.header(company_inf['company_name'])
+            st.subheader(f'{company_inf["ticker"]}')
+            st.caption(f'Market cap: {"{:,}".format(float(company_inf["market_cap"]))} USD')
+             # stat_holder.write(company_inf['description'])
+        
+        ticket_data = pd.DataFrame(fin.fetch(code, period))
+        fig_stock = utils.draw_stock_history(ticket_data, period=period)
+        chart_holder.plotly_chart(fig_stock, use_container_width=True)
+
+    else:
+        chart_area.caption("Cannot find ticker with your input, please retry...")
     
-        add_fav = st.checkbox("Add to favorite", value=False)
-        if add_fav:
-            cur_cod = st.session_state['current_code']
-            st.session_state['favorites'].add(cur_cod.upper())
-        else:
-            cur_cod = st.session_state['current_code'].upper()
-            if cur_cod in st.session_state['favorites']:
-                st.session_state['favorites'].remove(cur_cod)
-
-    # stat_holder.write(company_inf['description'])
-    chart_holder.plotly_chart(fig_stock, use_container_width=True)
 
 #=================== > Section 4 < =======================#
 with tab4: 
     import plotly.graph_objects as go
 
     st.header("3. Favorite tickers")
+    st.write("All favorite tickers data should be shown on the chart at the same time to be able to compare them and select which one to buy.")
+    st.write("User now can hide/unhide any line by unchecking/checking at the corresponding checkboxs.")
     pad, ct = st.columns([1, 12])
 
     chart_area_4, side_info_4 = ct.columns([3, 2])

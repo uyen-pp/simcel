@@ -27,7 +27,9 @@ app = FastAPI()
 
 @app.post("/data")
 def fetch_data(inp:InputModel) -> OutputModel:
-
+    """
+    Return history data of ticker inp.code in time of `priod`
+    """
     tic = yf.Ticker(inp.code)
     
     interval_map = {
@@ -40,10 +42,19 @@ def fetch_data(inp:InputModel) -> OutputModel:
     }
 
     interval = interval_map[inp.period.upper()]
-    dta = tic.history(period=inp.period, interval=interval)
+
+    dta = None
+
+    try:
+        dta = tic.history(period=inp.period, interval=interval)
+    except:
+        return OutputModel(status=500, data='No data found')
+
+    if len(dta) == 0:
+        return OutputModel(status=500, data='No data found')
+    
     dta.reset_index(drop=False, inplace=True)
 
-    # [['Open', 'Volume']]
     if 'Date' in dta.columns:
         dta.rename({'Date': 'Datetime'}, axis=1, inplace=True)
 
@@ -55,10 +66,17 @@ def fetch_data(inp:InputModel) -> OutputModel:
 
 @app.post("/company")
 def get_info(inp:InputModel) -> OutputModel:
+    """
+    Return company record which has ticker symbol or company_name or short_name equal to the input
+    """
     ques = inp.code.strip().lower()
     dta = df_companies.query('@ques == ticker.str.lower() or @ques == company_name.str.lower() or @ques==short_name.str.lower()')
     
     dta = dta.iloc[0].to_dict() if len(dta) == 1 else None
+
+    if not dta:
+        OutputModel(status=500, data='No data found')
+
     js = json.dumps(dta)
     return OutputModel(status=200, data=js)
     
@@ -66,7 +84,6 @@ def get_info(inp:InputModel) -> OutputModel:
 @app.get("/")
 async def root(): 
     return {"message": "Hi I'm Mei <3"}
-
 
 import uvicorn
 if __name__ == "__main__":
